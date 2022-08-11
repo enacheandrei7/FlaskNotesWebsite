@@ -4,6 +4,7 @@ from genericpath import exists
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
+from flask_login import LoginManager
 
 # Initialize the db
 db = SQLAlchemy()
@@ -31,6 +32,18 @@ def create_app():
     from .models import User, Note
 
     create_database(app)
+
+    login_manager = LoginManager()
+    # Here we specify where we should redirect the user if he's not logged in
+    login_manager.login_view = 'auth.login'
+    # Here we tell the login manager which app we're using
+    login_manager.init_app(app)
+
+    # Here we tell Flask how to load an user
+    @login_manager.user_loader
+    def load_user(id):
+        # Here it checks if the primary key is equal to the value we've passed (id)
+        return User.query.get(int(id))
 
     return app
 
